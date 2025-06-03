@@ -1,7 +1,5 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import DotPattern from "./magicui/dot-pattern";
 import { useRouter } from "next/navigation";
 import { AnimatedShinyTextComponent } from "./contact-ck";
 
@@ -16,7 +14,7 @@ const CubingKeralaCubingLengends = () => {
 
     return (
         <div className="relative flex h-full w-full items-center justify-center overflow-hidden text-stone-200">
-            <div className="container px-6 border bg-neutral-900 border-neutral-800 rounded-lg py-20">
+            <div className="container px-4 border bg-neutral-900 border-neutral-800 rounded-lg py-10 md:py-24">
                 <div className="flex flex-col items-center justify-center space-y-4 text-start md:text-center">
                     <div className="space-y-4">
                         <div className="inline-block rounded-lg text-sm text-green-400">Top Ranked Cubers</div>

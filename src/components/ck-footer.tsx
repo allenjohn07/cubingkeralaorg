@@ -16,7 +16,7 @@ const handleGithubRedirect = () => {
 
 const CubingKeralaFooter = () => {
     return (
-        <footer className="py-6 px-4 sm:px-6 text-stone-400 flex justify-center items-center">
+        <footer className="py-6 px-6 sm:px-6 text-stone-400 flex justify-center items-center">
             <div className="space-y-1 w-full">
                 <p className="text-xs text-stone-600">Created by <span onClick={() => handleLinkRedirect()} className="cursor-pointer hover:text-blue-400 transition-all duration-200 ease-in">allenjohn</span></p>
                 <div className='flex items-center justify-between'>

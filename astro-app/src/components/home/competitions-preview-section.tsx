@@ -32,7 +32,7 @@ function CompetitionsPreviewTable({
         <TableHeader className="[&_tr]:border-0">
           <TableRow className={DATA_GRID_ROW}>
             <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD)}>Name</TableHead>
-            <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[150px] whitespace-nowrap")}>Date</TableHead>
+            <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[9.375rem] whitespace-nowrap")}>Date</TableHead>
             <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "whitespace-nowrap")}>Location</TableHead>
             <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "text-right")}>Events</TableHead>
           </TableRow>

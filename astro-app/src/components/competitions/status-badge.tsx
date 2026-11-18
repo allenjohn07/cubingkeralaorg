@@ -23,7 +23,7 @@ export function CompetitionStatusBadge({
     return (
       <Badge
         variant="outline"
-        className="border-none bg-primary/10 px-2 py-0 text-[11px] font-medium tracking-wide text-primary"
+        className="border-none bg-primary/10 px-2 py-0 text-[0.6875rem] font-medium tracking-wide text-primary"
       >
         Upcoming
       </Badge>
@@ -34,7 +34,7 @@ export function CompetitionStatusBadge({
     return (
       <Badge
         variant="outline"
-        className="border-none bg-secondary px-2 py-0 text-[11px] font-medium tracking-wide text-secondary-foreground"
+        className="border-none bg-secondary px-2 py-0 text-[0.6875rem] font-medium tracking-wide text-secondary-foreground"
       >
         Ongoing
       </Badge>
@@ -45,7 +45,7 @@ export function CompetitionStatusBadge({
     return (
       <Badge
         variant="outline"
-        className="border-none bg-muted px-2 py-0 text-[11px] font-medium tracking-wide text-muted-foreground"
+        className="border-none bg-muted px-2 py-0 text-[0.6875rem] font-medium tracking-wide text-muted-foreground"
       >
         Cancelled
       </Badge>

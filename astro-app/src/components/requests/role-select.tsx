@@ -20,7 +20,7 @@ interface RoleSelectProps {
 export function RoleSelect({ value, onChange }: RoleSelectProps) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="flex h-8 w-[140px] shrink-0 items-center justify-between gap-1.5 rounded-md border border-input bg-background px-2.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground">
+      <DropdownMenuTrigger className="flex h-8 w-[8.75rem] shrink-0 items-center justify-between gap-1.5 rounded-md border border-input bg-background px-2.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground">
         <span className="truncate">{capitalizeRole(value)}</span>
         <ChevronDownIcon className="size-3.5 shrink-0 text-muted-foreground" />
       </DropdownMenuTrigger>

@@ -33,22 +33,22 @@ export function MembersTable({ members, wcaSummaries }: MembersTableProps) {
     <Table className={DATA_GRID_TABLE}>
       <TableHeader className="[&_tr]:border-0">
         <TableRow className={DATA_GRID_ROW}>
-          <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[50px]")}>
+          <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[3.125rem]")}>
             #
           </TableHead>
           <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD)}>
             Name
           </TableHead>
-          <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[150px]")}>
+          <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[9.375rem]")}>
             WCA ID
           </TableHead>
-          <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[120px]")}>
+          <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[7.5rem]")}>
             Role
           </TableHead>
-          <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[120px]")}>
+          <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[7.5rem]")}>
             Competitions
           </TableHead>
-          <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[100px]")}>
+          <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[6.25rem]")}>
             Medals
           </TableHead>
         </TableRow>

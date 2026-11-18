@@ -73,7 +73,7 @@ export function CompetitionTable({
           <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "whitespace-nowrap")}>
             Name
           </TableHead>
-          <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[180px] md:w-[220px] whitespace-nowrap")}>
+          <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[11.25rem] md:w-[13.75rem] whitespace-nowrap")}>
             Date
           </TableHead>
           <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "whitespace-nowrap")}>

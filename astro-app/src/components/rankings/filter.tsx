@@ -26,7 +26,7 @@ interface FilterComponentProps {
 export function FilterComponent({
   onFilterChange,
   triggerClassName,
-  eventWidthClassName = "w-[130px] sm:w-[160px]",
+  eventWidthClassName = "w-[8.125rem] sm:w-[10rem]",
 }: FilterComponentProps) {
   const [filter, setFilter] = useState<FilterState>({ event: "333", round: "single" });
 

@@ -46,7 +46,7 @@ export function RankingsPreviewSection({
         <FilterComponent
           onFilterChange={setFilter}
           triggerClassName="h-7 text-xs"
-          eventWidthClassName="w-[90px] sm:w-[110px]"
+          eventWidthClassName="w-[5.625rem] sm:w-[6.875rem]"
         />
       </div>
 

@@ -10,7 +10,7 @@
  * than 1400px used to still cap at the next breakpoint down).
  */
 export const NAVBAR_CONTAINER_CLASS =
-  "mx-auto w-full px-4 sm:px-6 lg:px-8 sm:max-w-[640px] md:max-w-[768px] lg:max-w-[1024px] xl:max-w-[1280px] min-[1400px]:max-w-[1400px]";
+  "mx-auto w-full px-4 sm:px-6 lg:px-8 sm:max-w-[40rem] md:max-w-[48rem] lg:max-w-[64rem] xl:max-w-[80rem] min-[1400px]:max-w-[87.5rem]";
 
 /** Spacing between individual navbar links — 20px, matching the reference. */
 export const NAVBAR_LINKS_GAP_CLASS = "gap-5";

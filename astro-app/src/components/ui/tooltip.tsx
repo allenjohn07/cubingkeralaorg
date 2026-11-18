@@ -28,7 +28,7 @@ const TooltipContent = React.forwardRef<
       align="center"
       sideOffset={sideOffset}
       className={cn(
-        "z-50 rounded-md border border-border bg-popover px-2 py-1 text-[11px] font-medium text-popover-foreground shadow-md",
+        "z-50 rounded-md border border-border bg-popover px-2 py-1 text-[0.6875rem] font-medium text-popover-foreground shadow-md",
         "animate-in fade-in-0 zoom-in-95 duration-100",
         "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=closed]:duration-75",
         "data-[side=bottom]:slide-in-from-top-1 data-[side=left]:slide-in-from-right-1 data-[side=right]:slide-in-from-left-1 data-[side=top]:slide-in-from-bottom-1",

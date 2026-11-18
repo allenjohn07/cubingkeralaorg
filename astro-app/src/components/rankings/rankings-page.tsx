@@ -1,11 +1,11 @@
 import { FilterComponent } from "./filter";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import type { CompetitorData } from "@/types/ranking";
 import { sortMembersByResult } from "@/utils/wca-sorting";
 import { getEventName } from "@/utils/event-names";
 import { RankingsTable } from "./rankings-table";
-import type { FilterState, RankingsComponentProps } from "@/types/ranking";
-import { NAVBAR_CONTAINER_CLASS } from "@/components/layout/navbar/layout";
+import type { RankingsComponentProps } from "@/types/ranking";
+import { DEFAULT_RANKINGS_FILTER, setRankingsFilter, useRankingsFilter } from "./rankings-filter-store";
 
 export const buildMemberResults = (
   rankingsWcaData: RankingsComponentProps["rankingsWcaData"],
@@ -78,23 +78,47 @@ export const buildMemberResults = (
   });
 };
 
-export default function RankingsPage({
+// The /rankings page is two islands, not one, so the .astro page can give
+// the header and the table their own `data-reveal` wrappers (like /members
+// and /competitions) — one wrapper around both was taller than the screen,
+// so it never left the viewport and never replayed its entrance. The
+// selected filter is shared through rankings-filter-store.ts.
+
+/** Title, "Showing results for…" line and the event/round menus. */
+export function RankingsHeader() {
+  const filter = useRankingsFilter();
+
+  // Module state outlives a soft navigation away from /rankings; reset it on
+  // the way out so the next visit starts on the default, matching the
+  // filter menus (which start fresh) and the server render.
+  useEffect(() => () => setRankingsFilter(DEFAULT_RANKINGS_FILTER), []);
+
+  return (
+    <div className="mb-4 flex flex-col items-start gap-4 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-2">
+        <h1 className="text-4xl font-semibold tracking-tight md:text-5xl">
+          Rankings
+        </h1>
+        <p className="text-sm text-muted-foreground md:text-base lg:whitespace-nowrap">
+          Showing results for {getEventName(filter.event)} {filter.round}
+        </p>
+      </div>
+      <FilterComponent onFilterChange={setRankingsFilter} />
+    </div>
+  );
+}
+
+/** The rankings table for the currently selected event/round. */
+export function RankingsResults({
   members,
   rankingsWcaData = {},
 }: RankingsComponentProps) {
+  const selectedFilter = useRankingsFilter();
+
   const memberResults = useMemo<CompetitorData[]>(() => {
     if (!members?.length) return [];
     return buildMemberResults(rankingsWcaData, members);
   }, [members, rankingsWcaData]);
-
-  const [selectedFilter, setSelectedFilter] = useState<FilterState>({
-    event: "333",
-    round: "single",
-  });
-
-  const handleFilterChange = useCallback((newFilter: FilterState) => {
-    setSelectedFilter(newFilter);
-  }, []);
 
   const sortedResults = useMemo(() => {
     if (!memberResults.length) return [];
@@ -115,26 +139,11 @@ export default function RankingsPage({
   );
 
   return (
-    <div className={`${NAVBAR_CONTAINER_CLASS} py-6 sm:py-10`}>
-      <div className="mb-4 flex flex-col items-start gap-4 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-4xl font-semibold tracking-tight md:text-5xl">
-            Rankings
-          </h1>
-          <p className="text-sm text-muted-foreground md:text-base lg:whitespace-nowrap">
-            Showing results for {getEventName(selectedFilter.event)}{" "}
-            {selectedFilter.round}
-          </p>
-        </div>
-        <FilterComponent onFilterChange={handleFilterChange} />
-      </div>
-
-      <RankingsTable
-        sortedResults={sortedResults}
-        selectedEvent={selectedFilter.event}
-        selectedRound={selectedFilter.round}
-        getResult={getResult}
-      />
-    </div>
+    <RankingsTable
+      sortedResults={sortedResults}
+      selectedEvent={selectedFilter.event}
+      selectedRound={selectedFilter.round}
+      getResult={getResult}
+    />
   );
 }

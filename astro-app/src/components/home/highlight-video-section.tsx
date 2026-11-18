@@ -54,7 +54,7 @@ export function HighlightVideoSection() {
           playsInline
           controls
           preload="metadata"
-          className="aspect-[9/16] h-[420px] shrink-0 rounded-2xl sm:h-[520px] lg:h-[600px]"
+          className="aspect-[9/16] h-[26.25rem] shrink-0 rounded-2xl sm:h-[32.5rem] lg:h-[37.5rem]"
         />
 
         <div className="flex max-w-md w-full flex-col gap-4 self-start text-left lg:self-auto">

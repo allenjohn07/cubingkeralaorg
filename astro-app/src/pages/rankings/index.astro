@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import RankingsPage from "@/components/rankings/rankings-page";
+import { RankingsHeader, RankingsResults } from "@/components/rankings/rankings-page";
+import { NAVBAR_CONTAINER_CLASS } from "@/components/layout/navbar/layout";
 import { env } from "cloudflare:workers";
 import { getDb } from "@/db/client";
 import { getAllMembers, getRankingsWcaDataForMembers } from "@/db/queries/members";
@@ -14,7 +15,16 @@ const rankingsWcaData = await getRankingsWcaDataForMembers(db, members.map((memb
   title="Rankings | Cubing Kerala"
   description="Fastest Cuber in Kerala. The rankings of members within the Rubik's Cube community in Kerala."
 >
-  <div data-reveal>
-    <RankingsPage client:load members={members} rankingsWcaData={rankingsWcaData} />
+  {/* Same structure as /members and /competitions: header and table each in
+      their own data-reveal wrapper, so the header replays its entrance on
+      scroll like every other page title. Two islands sharing the selected
+      filter via rankings-filter-store.ts. */}
+  <div class={`${NAVBAR_CONTAINER_CLASS} py-6 sm:py-10`}>
+    <div data-reveal>
+      <RankingsHeader client:load />
+    </div>
+    <div data-reveal>
+      <RankingsResults client:load members={members} rankingsWcaData={rankingsWcaData} />
+    </div>
   </div>
 </Layout>

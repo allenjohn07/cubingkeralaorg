@@ -6,7 +6,7 @@ export default function HeroSection() {
   return (
     <section className="pb-8 pt-10 sm:pt-12">
       <div className="mx-auto max-w-160 px-5 lg:max-w-3xl lg:text-center">
-        <h1 style={{ animationDelay: "0ms" }} className="motion-safe:animate-fade-up text-[clamp(40px,9vw,56px)] font-medium leading-none tracking-[-0.04em]">
+        <h1 style={{ animationDelay: "0ms" }} className="motion-safe:animate-fade-up text-[clamp(2.5rem,9vw,3.5rem)] font-medium leading-none tracking-[-0.04em]">
           The Rubik&apos;s Cube
           <br />
           <span className="text-primary">community</span> in Kerala.

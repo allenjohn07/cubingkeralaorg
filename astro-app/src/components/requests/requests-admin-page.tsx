@@ -162,9 +162,9 @@ export function RequestsAdminPage({ initialRequests, initialMembers }: RequestsA
             <TableHeader className="[&_tr]:border-0">
               <TableRow className={DATA_GRID_ROW}>
                 <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD)}>Name</TableHead>
-                <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[150px]")}>WCA ID</TableHead>
-                <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[160px]")}>Role</TableHead>
-                <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[180px] text-right")}>Actions</TableHead>
+                <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[9.375rem]")}>WCA ID</TableHead>
+                <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[10rem]")}>Role</TableHead>
+                <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[11.25rem] text-right")}>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -235,9 +235,9 @@ export function RequestsAdminPage({ initialRequests, initialMembers }: RequestsA
             <TableHeader className="[&_tr]:border-0">
               <TableRow className={DATA_GRID_ROW}>
                 <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD)}>Name</TableHead>
-                <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[150px]")}>WCA ID</TableHead>
-                <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[160px]")}>Role</TableHead>
-                <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[180px] text-right")}>Actions</TableHead>
+                <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[9.375rem]")}>WCA ID</TableHead>
+                <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[10rem]")}>Role</TableHead>
+                <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[11.25rem] text-right")}>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

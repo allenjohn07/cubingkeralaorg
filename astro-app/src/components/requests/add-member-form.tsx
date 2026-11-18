@@ -55,7 +55,7 @@ export function AddMemberForm({ onAdded }: AddMemberFormProps) {
         value={wcaid}
         onChange={(event) => setWcaid(event.target.value)}
         placeholder="WCA ID, e.g. 2023TEST01"
-        className="h-9 w-[200px]"
+        className="h-9 w-[12.5rem]"
         required
       />
       <RoleSelect value={role} onChange={setRole} />

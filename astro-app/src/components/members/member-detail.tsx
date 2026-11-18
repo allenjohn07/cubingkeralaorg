@@ -39,7 +39,7 @@ export function MemberDetail({ member, summary, wcaData, tags }: MemberDetailPro
 
   return (
     <div className={`py-6 sm:py-10 ${NAVBAR_CONTAINER_CLASS}`}>
-      <div className="grid grid-cols-1 gap-10 lg:grid-cols-[380px_minmax(0,1fr)] lg:gap-16">
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-[23.75rem_minmax(0,1fr)] lg:gap-16">
         <div className="flex flex-col gap-6">
           <div className="flex items-start gap-4">
             {hasRealAvatar ? (
@@ -55,7 +55,7 @@ export function MemberDetail({ member, summary, wcaData, tags }: MemberDetailPro
             )}
             <div className="flex min-w-0 flex-col gap-1.5">
               <h1 className="text-2xl font-semibold tracking-tight">{displayName}</h1>
-              <Badge className="w-fit px-2 py-0 text-[11px] font-medium tracking-wide">
+              <Badge className="w-fit px-2 py-0 text-[0.6875rem] font-medium tracking-wide">
                 {capitalizeRole(member.role)}
               </Badge>
               {localName ? <p className="text-sm text-muted-foreground">{localName}</p> : null}
@@ -77,7 +77,7 @@ export function MemberDetail({ member, summary, wcaData, tags }: MemberDetailPro
               {tags.delegateStatus && (
                 <Badge
                   variant="secondary"
-                  className="w-fit px-2 py-0 text-[11px] font-medium tracking-wide"
+                  className="w-fit px-2 py-0 text-[0.6875rem] font-medium tracking-wide"
                 >
                   {formatDelegateStatus(tags.delegateStatus)}
                 </Badge>
@@ -86,7 +86,7 @@ export function MemberDetail({ member, summary, wcaData, tags }: MemberDetailPro
                 <Badge
                   key={team.friendly_id}
                   variant="secondary"
-                  className="w-fit px-2 py-0 text-[11px] font-medium tracking-wide"
+                  className="w-fit px-2 py-0 text-[0.6875rem] font-medium tracking-wide"
                 >
                   {getTeamName(team.friendly_id)}
                 </Badge>

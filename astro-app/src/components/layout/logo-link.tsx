@@ -21,7 +21,7 @@ export function LogoLink({
       aria-label="Cubing Kerala home"
       className={cn(NAVBAR_LOGO_LINK_CLASS, "flex items-center gap-2", className)}
     >
-      <img src="/cubingkerala_logo.svg" alt="" width={22} height={22} className="size-[22px] shrink-0" />
+      <img src="/cubingkerala_logo.svg" alt="" width={22} height={22} className="size-[1.375rem] shrink-0" />
       <span className={titleClassName}>Cubing Kerala</span>
     </a>
   );

@@ -50,7 +50,7 @@ export function CompetitionResults({ results }: CompetitionResultsProps) {
               <Table className={DATA_GRID_TABLE}>
                 <TableHeader className="[&_tr]:border-0">
                   <TableRow className={DATA_GRID_ROW}>
-                    <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[50px]")}>#</TableHead>
+                    <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[3.125rem]")}>#</TableHead>
                     <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD)}>Name</TableHead>
                     <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD)}>Best</TableHead>
                     <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD)}>Average</TableHead>

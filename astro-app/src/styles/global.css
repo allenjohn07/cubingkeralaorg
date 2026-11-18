@@ -26,6 +26,15 @@
  */
 html {
   min-height: 100dvh;
+  /* Desktop scale-up: the whole design is rem-based (Tailwind text/spacing,
+     plus container and column widths written in rem), so this one value
+     scales everything. 100% (the visitor's own default, usually 16px) up
+     to a 1024px-wide window — phones/tablets are untouched — then growing
+     smoothly to 115% at 1440px and wider. Percent-based, so a visitor's
+     own browser font-size preference still applies on top. Breakpoints
+     are unaffected (media queries always use the browser default, not
+     this). Keep new layout sizes in rem, not px, or they won't follow. */
+  font-size: clamp(100%, 63.1% + 0.577vw, 115%);
 }
 
 body {

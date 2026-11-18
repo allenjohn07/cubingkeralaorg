@@ -32,11 +32,11 @@ export function PersonalRecordsTable({ personalRecords }: PersonalRecordsTablePr
         <TableHeader className="[&_tr]:border-0">
           <TableRow className={DATA_GRID_ROW}>
             <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD)}>Event</TableHead>
-            <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[100px]")}>Best</TableHead>
-            <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[100px]")}>Average</TableHead>
-            <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[60px]")}>NR</TableHead>
-            <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[60px]")}>CR</TableHead>
-            <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[60px]")}>WR</TableHead>
+            <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[6.25rem]")}>Best</TableHead>
+            <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[6.25rem]")}>Average</TableHead>
+            <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[3.75rem]")}>NR</TableHead>
+            <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[3.75rem]")}>CR</TableHead>
+            <TableHead className={cn(DATA_GRID_CELL, DATA_GRID_HEAD, "w-[3.75rem]")}>WR</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

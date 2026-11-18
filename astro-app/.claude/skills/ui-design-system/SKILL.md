@@ -20,8 +20,13 @@ for `astro-island`/`component-export` if unsure.
 
 ## Layout primitives
 
+- **Desktop scale-up / use rem, not px:** `html`'s font-size in `global.css` grows
+  fluidly from 100% (≤1024px windows) to 115% (≥1440px), and everything sized in
+  rem follows. Write layout sizes (widths, column widths, heights, arbitrary text
+  sizes) in rem — e.g. `w-[9.375rem]`, not `w-[150px]` — or they won't scale with
+  the rest of the page. Breakpoints (`min-[1400px]:` etc.) stay in px.
 - **`NAVBAR_CONTAINER_CLASS`** (`src/components/layout/navbar/layout.ts`) is the one
-  true max-width container (steps up to 1400px). It's the width ceiling for the
+  true max-width container (steps up to 87.5rem — 1400px at base size). It's the width ceiling for the
   navbar, footer, and every full-width page section — content never exceeds it. A
   narrower column (e.g. `max-w-160` / `max-w-3xl`) is used *inside* it for hero text or
   other deliberately narrow reading columns, never as a replacement for it.

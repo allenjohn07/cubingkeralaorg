@@ -2,7 +2,7 @@ import { NAVBAR_CONTAINER_CLASS } from "@/components/layout/navbar/layout";
 
 interface Photo {
   src: string;
-  /** Optional resized variants (see mediaImageSrcSet) — tiles are 220–260px wide. */
+  /** Optional resized variants (see mediaImageSrcSet) — tiles are 220–260px wide, up to ~300px on desktop (global.css root scale-up). */
   srcSet?: string;
   alt: string;
 }
@@ -45,7 +45,7 @@ function MarqueeRow({ photos, reverse, durationSeconds }: { photos: Photo[]; rev
             <img
               src={photo.src}
               srcSet={photo.srcSet || undefined}
-              sizes="(min-width: 640px) 260px, 220px"
+              sizes="(min-width: 1024px) 300px, (min-width: 640px) 260px, 220px"
               alt={photo.alt}
               // The first few tiles of each row are on screen at load — fetch
               // them right away; the rest can wait until they near the

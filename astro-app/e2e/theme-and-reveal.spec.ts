@@ -108,3 +108,40 @@ test("a section jumped past still comes down from above when scrolled back to", 
   await expect(first).toHaveAttribute("data-reveal-from", "top");
   await expect(first).toHaveCSS("opacity", "1");
 });
+
+for (const path of ["/rankings", "/members", "/competitions"]) {
+  test(`${path} title section replays its entrance scrolling back up`, async ({ page }) => {
+    await page.goto(path);
+    await page.mouse.move(400, 300);
+    const header = page.locator("main [data-reveal]").first();
+    await expect(header.locator("h1")).toBeVisible();
+    await expect(header).toHaveAttribute("data-revealed", "");
+
+    // Scroll until the title section is fully above the viewport.
+    for (let i = 0; i < 40; i++) {
+      const box = await header.boundingBox();
+      if (box && box.y + box.height < 0) break;
+      await page.mouse.wheel(0, 300);
+      await page.waitForTimeout(60);
+    }
+    await expect(header).not.toHaveAttribute("data-revealed", "");
+    await expect(header).toHaveAttribute("data-reveal-from", "top");
+
+    await wheelUntilInView(page, header);
+    await expect(header).toHaveAttribute("data-revealed", "");
+    await expect(header).toHaveAttribute("data-reveal-from", "top");
+    await expect(header).toHaveCSS("opacity", "1");
+  });
+}
+
+test("rankings filter still drives both the subtitle and the table", async ({ page }) => {
+  await page.goto("/rankings");
+  const subtitle = page.getByText(/^Showing results for/);
+  await expect(subtitle).toHaveText("Showing results for 3x3x3 single");
+  const firstRowBefore = await page.locator("main tbody tr").first().innerText();
+
+  await page.locator("main button[aria-haspopup]").first().click();
+  await page.getByRole("menuitemradio", { name: "2x2x2" }).click();
+  await expect(subtitle).toHaveText("Showing results for 2x2x2 single");
+  await expect.poll(() => page.locator("main tbody tr").first().innerText()).not.toBe(firstRowBefore);
+});

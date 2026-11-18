@@ -29,8 +29,8 @@ import { syncCompetitions } from "./lib/competitions/sync";
 // Two layers, applied only to the page routes below (never to /api/* or
 // POST requests, which already set their own no-store headers):
 //   1. Caching: a cache hit skips D1 + rendering entirely. Anonymous
-//      visitors get this on repeat clicks (edge cache + browser cache,
-//      see below); authenticated ones only get it via <ClientRouter />
+//      visitors get this on repeat clicks (edge cache only — the browser
+//      always revalidates, see below); authenticated ones only get it via <ClientRouter />
 //      (Layout.astro) skipping the full-page-reload cost, not via
 //      caching — see the Cache-Control comment further down for why.
 //   2. Rate limiter: a backstop against sustained bursts across many
@@ -48,13 +48,12 @@ import { syncCompetitions } from "./lib/competitions/sync";
 //      the next, unrelated visitor of the same URL. (Tried keying it
 //      per-visitor instead of excluding auth entirely — see the note
 //      below; reverted, it didn't work.)
-//   2. The requesting browser's own HTTP cache. Anonymous responses get a
-//      real `max-age` here too — safe, since anonymous content never
-//      varies by visitor, so there's nothing to leak. Authenticated
-//      responses deliberately do NOT — see the big comment on the
-//      Cache-Control line below for why a real max-age there caused a
-//      real, visible bug (the navbar flickering between Login/Logout
-//      while clicking around logged in).
+//   2. The requesting browser's own HTTP cache. NO page gets a real
+//      max-age here, anonymous or authenticated — every response leaves
+//      as `private, no-cache` (see forBrowser() below). Anonymous pages
+//      used to get `max-age=60`, which meant a page cached before login
+//      could be reused after it: the navbar flipping to Login and the
+//      Requests link vanishing while logged in, production-only.
 //
 // Tried (and reverted): keying the EDGE cache per-visitor by folding the
 // cookie's value into the cache key, so a logged-in visitor's repeat click
@@ -80,11 +79,12 @@ import { syncCompetitions } from "./lib/competitions/sync";
 // every first visit before logging in — would then get served as-is
 // after logging in, with zero server round trip, for up to that TTL:
 // Login/Logout and the admin Requests link would flicker depending on
-// which pages still had a stale pre-login entry. src/pages/api/auth/
-// callback.ts sends `Clear-Site-Data: "cache"` on login specifically to
-// invalidate any such pre-login entries (logout doesn't need this —
-// authenticated responses are never freely-reusable-cached in the first
-// place, so there's nothing stale for it to leave behind).
+// which pages still had a stale pre-login entry. The same failure applied
+// to anonymous pages' own `max-age=60` until that went too: the
+// `Clear-Site-Data: "cache"` that src/pages/api/auth/callback.ts sends on
+// login was supposed to wipe pre-login entries, but isn't reliably honored
+// across browsers. It's still sent, as a harmless extra, but correctness no
+// longer depends on it.
 const CACHEABLE_PATTERNS: RegExp[] = [
   /^\/$/,
   /^\/learn\/?$/,
@@ -111,6 +111,34 @@ function hasAuthCookie(request: Request): boolean {
   const cookieHeader = request.headers.get("Cookie");
   if (!cookieHeader) return false;
   return cookieHeader.split(";").some((pair) => pair.trim().startsWith("userInfo="));
+}
+
+// The Cache-Control every cacheable page carries ON ITS WAY TO THE BROWSER,
+// anonymous or not, edge-cache hit or fresh render: the browser may keep a
+// copy, but must ask the Worker before reusing it. The edge cache's own copy
+// keeps its long s-maxage (renderCacheable sets that, and it's what
+// cache.put() stores) — only the outgoing response is rewritten here.
+//
+// Why anonymous pages too: their navbar is rendered logged-out. With a real
+// browser max-age (this used to be `public, max-age=60`) any page visited
+// before logging in could be served straight from the browser's disk cache
+// after login — Login instead of Logout, no admin Requests link — with no
+// request ever reaching hasAuthCookie() to notice. The login callback's
+// `Clear-Site-Data: "cache"` was meant to wipe those entries, but browser
+// support for that directive is patchy (it's what made the bug intermittent
+// and production-only — `astro dev` skips this file entirely). With
+// `no-cache`, every navigation reaches the Worker, which picks the right
+// response from the actual cookie; an anonymous repeat click is still just
+// an edge-cache hit (no D1, no render), so it stays cheap. `Vary: Cookie` is
+// belt-and-braces for any cache in between that does honor it.
+const BROWSER_CACHE_CONTROL = "private, no-cache";
+
+function forBrowser(response: Response): Response {
+  if (!response.ok) return response;
+  const headers = new Headers(response.headers);
+  headers.set("Cache-Control", BROWSER_CACHE_CONTROL);
+  headers.set("Vary", "Cookie");
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
 
 function isCacheablePath(url: URL): boolean {
@@ -263,15 +291,14 @@ export default {
             ),
           );
         }
-        return cached;
+        return forBrowser(cached);
       }
     }
 
     // Only requests that actually reach this point count against the rate
-    // limit. An anonymous repeat visitor served straight from their own
-    // browser's cache (or the edge cache) never reaches the network at
-    // all, so it never reaches here; every authenticated request does,
-    // since those are never freely-reusable-cached (see below).
+    // limit. An anonymous visitor served from the edge cache returned above
+    // and never reaches here; every authenticated request does, since
+    // those are never edge-cached (see above).
     const clientIp = request.headers.get("CF-Connecting-IP") ?? "unknown";
     const { success } = await env.RATE_LIMITER.limit({ key: clientIp });
     if (!success) {
@@ -284,7 +311,7 @@ export default {
     if (!cacheablePath) return handle(request, env, ctx);
     const response = await renderCacheable(request, env, ctx, authenticated);
     if (cacheKey && response.ok) ctx.waitUntil(cache.put(cacheKey, response.clone()));
-    return response;
+    return forBrowser(response);
   },
   async scheduled(_event, env, _ctx) {
     const db = getDb(env.DB);
@@ -331,7 +358,8 @@ async function renderCacheable(
     // authenticated repeat-clicks no longer skipping the network (they
     // still skip the extra cost of a full page reload, via ClientRouter).
     // s-maxage is what the edge Cache API keys its own expiry off — the
-    // long stale window — while max-age keeps the browser's copy short.
+    // long stale window. This value is only what cache.put() stores; the
+    // browser never sees it (fetch() rewrites it via forBrowser()).
     headers.set(
       "Cache-Control",
       authenticated

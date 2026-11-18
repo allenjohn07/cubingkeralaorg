@@ -24,6 +24,11 @@ pnpm-debug.log*
 .dev.vars
 .dev.vars.*
 
+# Playwright: saved login session (holds a real auth cookie) + run artifacts
+astro-app/e2e/.auth/
+astro-app/test-results/
+astro-app/playwright-report/
+
 # macOS-specific files
 .DS_Store
 

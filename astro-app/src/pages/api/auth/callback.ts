@@ -14,6 +14,8 @@ import { createErrorResponse } from "@/lib/api/response";
 // only, and the one client-side reader (useAuth, in Navbar) has been
 // replaced with a server-computed isLoggedIn prop from Layout.astro, so
 // nothing actually needed JS access to this cookie's contents.
+const SESSION_MAX_AGE_SECONDS = 30 * 24 * 60 * 60;
+
 export const GET: APIRoute = async ({ url, cookies, redirect }) => {
   const code = url.searchParams.get("code");
   if (!code) return redirect("/");
@@ -35,10 +37,9 @@ export const GET: APIRoute = async ({ url, cookies, redirect }) => {
     if (!tokenResponse.ok) {
       return createErrorResponse("Failed to exchange code for token", 500);
     }
-    const { access_token, token_type, expires_in } = (await tokenResponse.json()) as {
+    const { access_token, token_type } = (await tokenResponse.json()) as {
       access_token: string;
       token_type: string;
-      expires_in: number;
     };
 
     const userInfoResponse = await fetch("https://www.worldcubeassociation.org/api/v0/me", {
@@ -60,30 +61,26 @@ export const GET: APIRoute = async ({ url, cookies, redirect }) => {
       gender: userInfo.me.gender,
     });
 
-    const expires = new Date(Date.now() + expires_in * 1000);
+    // The session's lifetime is ours, not WCA's: the access token is only
+    // used for the /me fetch above and never again, so its (short) expires_in
+    // has nothing to do with how long the visitor should stay logged in.
+    // Tying the cookie to it logged people out mid-browse, which looked
+    // exactly like the navbar "forgetting" the login.
     cookies.set("userInfo", JSON.stringify(userInfo), {
       path: "/",
-      expires,
+      maxAge: SESSION_MAX_AGE_SECONDS,
       httpOnly: true,
       sameSite: "lax", // must survive the top-level redirect back from WCA's OAuth server
       secure: url.protocol === "https:",
     });
 
-    // Anonymous pages are cached in the browser's own HTTP cache for a
-    // real TTL (see worker.ts) — without something here, ANY page the
-    // browser cached while still logged out (not just "/" — everywhere
-    // the visitor clicked before logging in) could keep showing the
-    // logged-out navbar/missing-admin-link state after this redirect,
-    // since the browser has no way to know the cookie just changed and
-    // would serve those cached pages straight from disk, no server round
-    // trip at all. That's exactly what a narrower fix (just cache-busting
-    // this one redirect's URL) missed: it covered the page landed on
-    // right after login, not whatever pages the visitor clicked to next.
-    // Clear-Site-Data wipes all of them at once; the unique query param
-    // on top is a cheap, redundant guarantee specifically for the one
-    // page this redirect lands on, independent of Clear-Site-Data's own
-    // timing. Layout.astro strips that param from the address bar right
-    // after load either way.
+    // Belt-and-braces only. Pages are never reused from the browser cache
+    // without revalidating (worker.ts's forBrowser()), so a page cached
+    // while logged out can't be shown after this login regardless.
+    // Clear-Site-Data used to be the only guard against that, and it was
+    // not reliable (browser support for "cache" is patchy). The unique
+    // query param likewise just guarantees a fresh fetch of the landing
+    // page; Layout.astro strips it from the address bar right after load.
     const response = redirect(`/?__fresh=${Date.now()}`);
     response.headers.set("Clear-Site-Data", '"cache"');
     return response;

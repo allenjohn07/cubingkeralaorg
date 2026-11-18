@@ -7,7 +7,7 @@ import { createSuccessResponse, createErrorResponse } from "@/lib/api/response";
 import { validateRequestBody, photoDeleteSchema } from "@/lib/api/validation";
 
 export const DELETE: APIRoute = async ({ request, cookies }) => {
-  const authError = requireAdmin(cookies);
+  const authError = await requireAdmin(cookies);
   if (authError) return authError;
 
   const validation = await validateRequestBody(request, photoDeleteSchema);

@@ -1,29 +1,21 @@
 import type { AstroCookies } from "astro";
 import { isAdminAccount } from "@/config/admin";
+import { readSession, type SessionUser } from "@/lib/auth/session";
 
-/** Shape of the `userInfo` cookie — the raw WCA /api/v0/me response. */
-export interface SessionUser {
-  me?: { id?: number; wca_id?: string };
-}
+export type { SessionUser };
 
-export function verifyAuth(cookies: AstroCookies): {
+/** Verifies the signed session cookie (see src/lib/auth/session.ts). */
+export async function verifyAuth(cookies: AstroCookies): Promise<{
   isAuthenticated: boolean;
   user?: SessionUser;
-} {
-  const userCookie = cookies.get("userInfo");
-  if (!userCookie) return { isAuthenticated: false };
-
-  try {
-    const user = JSON.parse(userCookie.value) as SessionUser;
-    return { isAuthenticated: true, user };
-  } catch {
-    return { isAuthenticated: false };
-  }
+}> {
+  const user = await readSession(cookies);
+  return user ? { isAuthenticated: true, user } : { isAuthenticated: false };
 }
 
 /** Returns a 401 Response if not authenticated, otherwise null (caller proceeds). */
-export function requireAuth(cookies: AstroCookies): Response | null {
-  const { isAuthenticated } = verifyAuth(cookies);
+export async function requireAuth(cookies: AstroCookies): Promise<Response | null> {
+  const { isAuthenticated } = await verifyAuth(cookies);
   if (!isAuthenticated) {
     return new Response(JSON.stringify({ message: "Unauthorized" }), {
       status: 401,
@@ -34,11 +26,14 @@ export function requireAuth(cookies: AstroCookies): Response | null {
 }
 
 /** Logged-in admin only. Use on approve / update / delete member-request routes. */
-export function requireAdmin(cookies: AstroCookies): Response | null {
-  const authError = requireAuth(cookies);
-  if (authError) return authError;
-
-  const { user } = verifyAuth(cookies);
+export async function requireAdmin(cookies: AstroCookies): Promise<Response | null> {
+  const { isAuthenticated, user } = await verifyAuth(cookies);
+  if (!isAuthenticated) {
+    return new Response(JSON.stringify({ message: "Unauthorized" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
   if (!isAdminAccount(user?.me)) {
     return new Response(JSON.stringify({ message: "Forbidden" }), {
       status: 403,

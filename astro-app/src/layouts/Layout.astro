@@ -11,6 +11,7 @@ import { env } from "cloudflare:workers";
 import { getDb } from "@/db/client";
 import { getMemberByWcaid } from "@/db/queries/members";
 import { getUserProfileFields } from "@/db/queries/users";
+import { readSession } from "@/lib/auth/session";
 
 interface Props {
   title?: string;
@@ -43,18 +44,19 @@ const ogImageUrl = `${SITE_ORIGIN}/og-image.png`;
 // too so the Requests nav link (and the footer's EmailControl) can be
 // server-rendered correctly on first paint instead of popping in after
 // client-side JS runs.
-const userCookie = Astro.cookies.get("userInfo");
+// readSession verifies the cookie's signature — a forged or pre-signing
+// cookie renders exactly like being logged out.
+const session = await readSession(Astro.cookies);
 let isAdmin = false;
 let isLoggedIn = false;
 let initialProfile: { isMember: boolean; email: string | null; emailConsent: boolean } | null = null;
 
-if (userCookie) {
+if (session) {
   try {
-    const userData = JSON.parse(userCookie.value);
     isLoggedIn = true;
-    isAdmin = isAdminAccount(userData.me);
+    isAdmin = isAdminAccount(session.me);
 
-    const wcaid = userData.me?.wca_id;
+    const wcaid = session.me.wca_id;
     if (wcaid) {
       const db = getDb(env.DB);
       const [member, profileFields] = await Promise.all([

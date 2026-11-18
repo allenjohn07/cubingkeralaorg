@@ -14,7 +14,7 @@ import { validateRequestBody, adminAddMemberSchema } from "@/lib/api/validation"
 // competition_count — i.e. what powers rankings) comes from one live WCA
 // API call, same endpoint/SSRF-safe lookup the sync job uses.
 export const POST: APIRoute = async ({ request, cookies }) => {
-  const authError = requireAdmin(cookies);
+  const authError = await requireAdmin(cookies);
   if (authError) return authError;
 
   const validation = await validateRequestBody(request, adminAddMemberSchema);

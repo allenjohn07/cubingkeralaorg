@@ -6,25 +6,17 @@ import { NAVBAR_CONTAINER_CLASS } from "@/components/layout/navbar/layout";
 import { env } from "cloudflare:workers";
 import { getDb } from "@/db/client";
 import { getAllMembers, getWcaSummaryForMembers } from "@/db/queries/members";
+import { readSession } from "@/lib/auth/session";
 
 const db = getDb(env.DB);
 const members = await getAllMembers(db);
 const wcaSummaries = await getWcaSummaryForMembers(db, members.map((member) => member.wcaid));
 
-const userCookie = Astro.cookies.get("userInfo");
-let isLoggedIn = false;
-let isMember = false;
-if (userCookie) {
-  try {
-    const wcaid = JSON.parse(userCookie.value)?.me?.wca_id;
-    isLoggedIn = true;
-    // Already have the full members list fetched above — no need for a
-    // second DB query just to check whether the viewer is in it.
-    isMember = members.some((member) => member.wcaid === wcaid);
-  } catch {
-    isLoggedIn = false;
-  }
-}
+const session = await readSession(Astro.cookies);
+const isLoggedIn = !!session;
+// Already have the full members list fetched above — no need for a second
+// DB query just to check whether the viewer is in it.
+const isMember = !!session && members.some((member) => member.wcaid === session.me.wca_id);
 ---
 
 <Layout title="Members | Cubing Kerala" description="Members of Rubik's Cube community in Kerala">

@@ -3,6 +3,7 @@ import { env } from "cloudflare:workers";
 import { getDb } from "@/db/client";
 import { findOrCreateUser } from "@/db/queries/users";
 import { createErrorResponse } from "@/lib/api/response";
+import { createSessionValue, SESSION_COOKIE, SESSION_MAX_AGE_SECONDS, type SessionUser } from "@/lib/auth/session";
 
 // Ported from src/app/api/auth/callback/route.ts, with two deliberate
 // changes: the old app also set an `authToken` httpOnly cookie (the raw WCA
@@ -13,8 +14,8 @@ import { createErrorResponse } from "@/lib/api/response";
 // (middleware.ts, requireAuth/requireAdmin) already reads it server-side
 // only, and the one client-side reader (useAuth, in Navbar) has been
 // replaced with a server-computed isLoggedIn prop from Layout.astro, so
-// nothing actually needed JS access to this cookie's contents.
-const SESSION_MAX_AGE_SECONDS = 30 * 24 * 60 * 60;
+// nothing actually needed JS access to this cookie's contents. Its value is
+// a signed session (src/lib/auth/session.ts), not the raw WCA /me JSON.
 
 export const GET: APIRoute = async ({ url, cookies, redirect }) => {
   const code = url.searchParams.get("code");
@@ -48,9 +49,7 @@ export const GET: APIRoute = async ({ url, cookies, redirect }) => {
     if (!userInfoResponse.ok) {
       return createErrorResponse("Failed to fetch WCA profile", 500);
     }
-    const userInfo = (await userInfoResponse.json()) as {
-      me: { wca_id: string; name: string; avatar: { url: string }; country: { name: string }; gender: string };
-    };
+    const userInfo = (await userInfoResponse.json()) as SessionUser;
 
     const db = getDb(env.DB);
     await findOrCreateUser(db, {
@@ -61,12 +60,13 @@ export const GET: APIRoute = async ({ url, cookies, redirect }) => {
       gender: userInfo.me.gender,
     });
 
+    // Signed (src/lib/auth/session.ts) so the cookie can't be hand-forged.
     // The session's lifetime is ours, not WCA's: the access token is only
     // used for the /me fetch above and never again, so its (short) expires_in
     // has nothing to do with how long the visitor should stay logged in.
     // Tying the cookie to it logged people out mid-browse, which looked
     // exactly like the navbar "forgetting" the login.
-    cookies.set("userInfo", JSON.stringify(userInfo), {
+    cookies.set(SESSION_COOKIE, await createSessionValue(userInfo.me), {
       path: "/",
       maxAge: SESSION_MAX_AGE_SECONDS,
       httpOnly: true,

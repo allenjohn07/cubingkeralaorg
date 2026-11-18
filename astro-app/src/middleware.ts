@@ -1,5 +1,6 @@
 import { defineMiddleware } from "astro:middleware";
 import { isAdminAccount } from "@/config/admin";
+import { readSession, SESSION_COOKIE } from "@/lib/auth/session";
 
 // Ported from the Next.js app's src/middleware.ts. One change: `/_next` →
 // `/_astro` (Astro's own build-output path for JS/CSS, the equivalent
@@ -15,7 +16,7 @@ const VALID_ROUTES = [
   "/unsubscribe",
 ];
 
-export const onRequest = defineMiddleware((context, next) => {
+export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname } = context.url;
 
   // www and the bare domain both serve identical content with no redirect
@@ -53,28 +54,22 @@ export const onRequest = defineMiddleware((context, next) => {
     }
   }
 
-  const userCookie = context.cookies.get("userInfo");
-  if (!userCookie) {
-    if (pathname.startsWith("/requests")) {
-      return context.redirect("/");
-    }
-    return next();
-  }
+  const hasSessionCookie = context.cookies.has(SESSION_COOKIE);
+  const session = hasSessionCookie ? await readSession(context.cookies) : null;
 
-  let userData: { me?: { id?: number; wca_id?: string } };
-  try {
-    userData = JSON.parse(userCookie.value);
-  } catch (error) {
-    console.error("Error parsing userInfo cookie:", error);
+  if (pathname.startsWith("/requests") && !isAdminAccount(session?.me)) {
     return context.redirect("/");
   }
 
-  if (pathname.startsWith("/requests")) {
-    if (isAdminAccount(userData.me)) {
-      return next();
-    }
-    return context.redirect("/");
+  // A cookie that's present but fails verification (forged, expired, or a
+  // pre-signing session from before signing existed) is dropped, so the
+  // visitor is cleanly logged out instead of carrying it around. Pages render
+  // it as logged out either way, since every reader verifies the signature
+  // itself. (worker.ts strips Set-Cookie from its cacheable page routes, so
+  // in practice the deletion lands on the next non-page request, e.g. an
+  // API call or the login redirect — fine, correctness never depends on it.)
+  if (hasSessionCookie && !session) {
+    context.cookies.delete(SESSION_COOKIE, { path: "/" });
   }
-
   return next();
 });

@@ -13,7 +13,7 @@ import { syncSingleMemberWcaData } from "@/lib/wca/sync";
 // Cloudflare's equivalent of Next's after() — so it doesn't block the
 // response the admin is waiting on.
 export const POST: APIRoute = async ({ request, cookies, locals }) => {
-  const authError = requireAdmin(cookies);
+  const authError = await requireAdmin(cookies);
   if (authError) return authError;
 
   const validation = await validateRequestBody(request, requestInfoSchema);

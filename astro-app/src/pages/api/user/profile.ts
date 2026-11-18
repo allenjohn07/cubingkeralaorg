@@ -8,10 +8,10 @@ import { createSuccessResponse, createErrorResponse } from "@/lib/api/response";
 import { validateRequestBody, userProfileUpdateSchema } from "@/lib/api/validation";
 
 export const GET: APIRoute = async ({ cookies }) => {
-  const authError = requireAuth(cookies);
+  const authError = await requireAuth(cookies);
   if (authError) return authError;
 
-  const { user } = verifyAuth(cookies);
+  const { user } = await verifyAuth(cookies);
   const wcaid = user?.me?.wca_id;
   if (!wcaid) return createErrorResponse("Invalid session", 400);
 
@@ -31,10 +31,10 @@ export const GET: APIRoute = async ({ cookies }) => {
 };
 
 export const PATCH: APIRoute = async ({ request, cookies }) => {
-  const authError = requireAuth(cookies);
+  const authError = await requireAuth(cookies);
   if (authError) return authError;
 
-  const { user } = verifyAuth(cookies);
+  const { user } = await verifyAuth(cookies);
   const wcaid = user?.me?.wca_id;
   if (!wcaid) return createErrorResponse("Invalid session", 400);
 

@@ -10,15 +10,15 @@ import { createSuccessResponse, createErrorResponse } from "@/lib/api/response";
 // user's info as a client-POSTed body, trusting the client to accurately
 // describe itself (requireAuth only checked that *some* valid session
 // existed, not that the posted body matched it). This reads identity from
-// the already-verified `userInfo` cookie instead — no body needed, and a
+// the signed, verified session cookie instead — no body needed, and a
 // user can only ever request membership as themselves.
 export const POST: APIRoute = async ({ cookies }) => {
-  const authError = requireAuth(cookies);
+  const authError = await requireAuth(cookies);
   if (authError) return authError;
 
-  const { user } = verifyAuth(cookies);
+  const { user } = await verifyAuth(cookies);
   const wcaid = user?.me?.wca_id;
-  if (!wcaid) {
+  if (!user || !wcaid) {
     return createErrorResponse("Invalid session", 400);
   }
 
@@ -35,18 +35,12 @@ export const POST: APIRoute = async ({ cookies }) => {
       return createErrorResponse("Already a member", 400);
     }
 
-    // Re-read the full cookie to get name/avatar/country/gender — verifyAuth
-    // only types the admin-check-relevant subset.
-    const fullUser = JSON.parse(cookies.get("userInfo")!.value) as {
-      me: { wca_id: string; name: string; avatar: { url: string }; country: { name: string }; gender: string };
-    };
-
     await createRequest(db, {
       wcaid,
-      name: fullUser.me.name,
-      avatarUrl: fullUser.me.avatar.url,
-      country: fullUser.me.country.name,
-      gender: fullUser.me.gender,
+      name: user.me.name,
+      avatarUrl: user.me.avatar.url,
+      country: user.me.country.name,
+      gender: user.me.gender,
       role: "member",
     });
 

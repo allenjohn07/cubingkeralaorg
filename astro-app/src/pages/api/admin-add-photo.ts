@@ -21,7 +21,7 @@ const ALLOWED_TYPES: Record<string, string> = {
 // then records it in the new Photos table so the homepage can read the
 // gallery from D1 instead of a hardcoded array.
 export const POST: APIRoute = async ({ request, cookies }) => {
-  const authError = requireAdmin(cookies);
+  const authError = await requireAdmin(cookies);
   if (authError) return authError;
 
   let formData: FormData;

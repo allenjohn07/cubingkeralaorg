@@ -48,6 +48,10 @@ for `astro-island`/`component-export` if unsure.
   looked fine in light mode, became an unrecognizable mess in dark mode once inverted).
   The footer's Allen John logo (`public/allen-logo-transparent.png`) is a verified-safe
   example of this pattern.
+- Theme switches are instant everywhere: `useTheme` adds `theme-switching` to
+  `<html>` for the frame the `dark` class flips, which suspends all transitions
+  (`global.css`). `transition-colors` on controls is fine — don't add per-component
+  workarounds for theme-toggle fades. Toggle the theme only via `useTheme`.
 - The viewport meta tag (`width=device-width, initial-scale=1`) in `Layout.astro` is
   load-bearing — its absence caused a real mobile rendering bug (whole page shrinking
   into a framed box). Don't touch it without a specific reason.
@@ -134,9 +138,11 @@ On mobile this stacks (media first, centered); at `lg:` it goes side-by-side.
 - Framer Motion is installed but not currently used anywhere in the UI — don't add it
   speculatively; CSS has covered every case so far.
 - **Section entrance animations:** add `data-reveal` to a section's wrapper and
-  it eases in (fade + 16px rise + 0.98→1 scale) the first time it scrolls into
-  view; blocks entering together stagger by 80ms (`data-reveal-delay="ms"` adds
-  a base delay). Script is inline in `Layout.astro`'s `<head>`, CSS under
+  it eases in (fade + 16px slide + 0.98→1 scale) every time it scrolls into
+  view, from the side it enters on — rising while scrolling down, settling down
+  from above while scrolling up. It's re-armed only once fully off-screen, so
+  the reset is never visible. Blocks entering together stagger by 80ms
+  (`data-reveal-delay="ms"` adds a base delay). Script is inline in `Layout.astro`'s `<head>`, CSS under
   "Section reveal" in `global.css`. Put `data-reveal` only on Astro-rendered
   markup (wrap a hydrated island in a `<div data-reveal>`), never inside a
   React island. Above-the-fold hero content uses pure-CSS

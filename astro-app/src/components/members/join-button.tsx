@@ -17,6 +17,8 @@ interface JoinButtonProps {
 export function JoinButton({ isLoggedIn, isMember }: JoinButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
 
+  // Logged out: same label as the real button, so the call to action reads
+  // the same for everyone — clicking it just explains that login comes first.
   if (!isLoggedIn) {
     return (
       <Button
@@ -25,7 +27,7 @@ export function JoinButton({ isLoggedIn, isMember }: JoinButtonProps) {
         size="sm"
         onClick={() => toast.info("Login to join")}
       >
-        Login to join
+        Join Cubing Kerala
       </Button>
     );
   }

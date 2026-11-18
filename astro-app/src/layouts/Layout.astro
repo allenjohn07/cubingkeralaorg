@@ -193,14 +193,21 @@ if (session) {
       } catch {}
     </script>
     {/* Section reveal (CSS in global.css, under "Section reveal"): eases
-        each `data-reveal` element in the first time it enters the
-        viewport. Inline in <head> so `reveal-ready` is on <html> before
-        first paint — content never flashes visible and then hides. Runs
-        once: the first page starts observing at DOMContentLoaded (not
-        waiting on the router's own script to load), and each
-        <ClientRouter /> soft navigation re-observes on astro:page-load —
-        its swap replaces <body> and wipes <html>'s classes (same as
-        ckApplyTheme above), so the class is re-added before each swap. */}
+        each `data-reveal` element in whenever it enters the viewport, from
+        the side it enters on — rising up while scrolling down, settling
+        down while scrolling back up. Two observers:
+          - `enter` reveals an element as it comes into view;
+          - `exit` re-arms it only once it's FULLY off-screen (plain
+            viewport, no margin), recording which edge it left by, so the
+            reset is never visible and the next entrance comes from the
+            right direction.
+        Inline in <head> so `reveal-ready` is on <html> before first paint
+        — content never flashes visible and then hides. The first page
+        starts observing at DOMContentLoaded (not waiting on the router's
+        own script to load), and each <ClientRouter /> soft navigation
+        re-observes on astro:page-load — its swap replaces <body> and wipes
+        <html>'s classes (same as ckApplyTheme above), so the class is
+        re-added before each swap. */}
     <script is:inline>
       (function () {
         if (!("IntersectionObserver" in window)) return;
@@ -209,38 +216,79 @@ if (session) {
 
         var STAGGER_MS = 80;
         var MAX_STAGGER_STEPS = 4;
-        var observer = null;
-
-        function reveal(el, delay) {
-          if (delay) el.style.transitionDelay = delay + "ms";
-          el.setAttribute("data-revealed", "");
-        }
+        var enter = null;
+        var exit = null;
 
         // Idempotent: safe to run again for the same page (DOMContentLoaded
         // and then astro:page-load both fire on a full load).
         function observePage() {
-          if (observer) observer.disconnect();
-          observer = new IntersectionObserver(
+          if (enter) enter.disconnect();
+          if (exit) exit.disconnect();
+
+          // Which way the page last moved, updated from both observers'
+          // callbacks (whichever runs first in a frame) — read there, not
+          // via a scroll listener; they already fire on every edge crossing,
+          // which is all that's needed. Sticky: a callback that sees no
+          // movement since the previous one keeps the last direction.
+          var lastScrollY = window.scrollY;
+          var scrollingUp = false;
+          function trackDirection() {
+            var y = window.scrollY;
+            if (y !== lastScrollY) scrollingUp = y < lastScrollY;
+            lastScrollY = y;
+          }
+
+          enter = new IntersectionObserver(
             function (entries) {
+              trackDirection();
               // Elements that come into view together (e.g. everything
               // above the fold on load) cascade in one after another.
               var step = 0;
               entries.forEach(function (entry) {
-                if (!entry.isIntersecting) return;
                 var el = entry.target;
+                if (!entry.isIntersecting || el.hasAttribute("data-revealed")) return;
+                // `exit` normally records the right side already, but an
+                // element jumped clean past (End key, scrollbar drag, an
+                // anchor link) never crossed an edge, so it can still be
+                // armed for the wrong side. Snap it across with transitions
+                // off — it's still fully transparent, so this is invisible.
+                var from = scrollingUp ? "top" : "bottom";
+                if ((el.getAttribute("data-reveal-from") || "bottom") !== from) {
+                  el.style.transition = "none";
+                  el.setAttribute("data-reveal-from", from);
+                  void el.offsetHeight;
+                  el.style.transition = "";
+                }
                 var baseDelay = Number(el.getAttribute("data-reveal-delay")) || 0;
-                reveal(el, baseDelay + Math.min(step, MAX_STAGGER_STEPS) * STAGGER_MS);
+                var delay = baseDelay + Math.min(step, MAX_STAGGER_STEPS) * STAGGER_MS;
+                el.style.transitionDelay = delay ? delay + "ms" : "";
+                el.setAttribute("data-revealed", "");
                 step++;
-                observer.unobserve(el);
               });
             },
-            // Trigger once an element's top is ~10% up from the bottom of
-            // the viewport (threshold 0, so very tall blocks like the full
-            // members list still trigger promptly).
+            // Coming up from below: trigger once an element's top is ~10%
+            // up from the bottom of the viewport. Coming down from above it
+            // triggers as soon as its bottom edge appears. Threshold 0, so
+            // very tall blocks like the full members list still trigger
+            // promptly.
             { rootMargin: "0px 0px -10% 0px" },
           );
-          document.querySelectorAll("[data-reveal]:not([data-revealed])").forEach(function (el) {
-            observer.observe(el);
+
+          exit = new IntersectionObserver(function (entries) {
+            trackDirection();
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) return;
+              var el = entry.target;
+              // Left by the top edge (scrolled past) → re-enters from above.
+              el.setAttribute("data-reveal-from", entry.boundingClientRect.top < 0 ? "top" : "bottom");
+              el.style.transitionDelay = "";
+              el.removeAttribute("data-revealed");
+            });
+          });
+
+          document.querySelectorAll("[data-reveal]").forEach(function (el) {
+            enter.observe(el);
+            exit.observe(el);
           });
         }
 

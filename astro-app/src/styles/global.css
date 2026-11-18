@@ -220,10 +220,13 @@ ul {
 }
 
 /* Section reveal: any element marked `data-reveal` eases in (fade + slight
-   rise + scale-up) the first time it enters the viewport — see the reveal
-   script in Layout.astro, which sets `reveal-ready` on <html> (only when
-   motion is allowed and IntersectionObserver exists, so without it content
-   is simply visible) and `data-revealed` on each element as it appears.
+   slide + scale-up) every time it enters the viewport — rising from below
+   while scrolling down, settling down from above while scrolling back up
+   (`data-reveal-from="top"`). See the reveal script in Layout.astro, which
+   sets `reveal-ready` on <html> (only when motion is allowed and
+   IntersectionObserver exists, so without it content is simply visible),
+   `data-revealed` on each element as it appears, and re-arms it only once
+   it's fully off-screen, so the reset itself is never seen.
    Transform/opacity only, so it never causes layout shift; once revealed
    the transform is back to `none`, so it can't affect sticky/fixed
    descendants. Only put `data-reveal` on markup rendered by Astro (or a
@@ -237,6 +240,21 @@ html.reveal-ready [data-reveal] {
 html.reveal-ready [data-reveal]:not([data-revealed]) {
   opacity: 0;
   transform: translateY(16px) scale(0.98);
+}
+html.reveal-ready [data-reveal][data-reveal-from="top"]:not([data-revealed]) {
+  transform: translateY(-16px) scale(0.98);
+}
+
+/* Theme switch: useTheme adds `theme-switching` to <html> for the one frame
+   the `dark` class flips, so every color changes in the same instant.
+   Without it, anything with `transition-colors` (search inputs, the
+   rankings selectors, buttons, table rows…) faded over 150ms while the
+   page around it snapped instantly — a visible flicker. Reveal wrappers
+   are left alone so a section mid-entrance doesn't jump. */
+html.theme-switching *:not([data-reveal]),
+html.theme-switching *::before,
+html.theme-switching *::after {
+  transition: none !important;
 }
 
 /* Layout.astro's <ClientRouter /> makes internal navigation a soft swap

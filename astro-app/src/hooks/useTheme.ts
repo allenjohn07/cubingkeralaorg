@@ -25,7 +25,17 @@ export function useTheme() {
 
   const applyTheme = useCallback((next: "light" | "dark") => {
     setTheme(next);
-    document.documentElement.classList.toggle("dark", next === "dark");
+    // Flip the theme with transitions suspended (see `theme-switching` in
+    // global.css), so every element changes color in the same frame instead
+    // of `transition-colors` elements fading behind the rest. Forcing a
+    // layout (offsetHeight) makes the browser compute every element's new
+    // style right now, while transitions are still off; removing the class
+    // two frames later then changes nothing visible.
+    const root = document.documentElement;
+    root.classList.add("theme-switching");
+    root.classList.toggle("dark", next === "dark");
+    void document.body.offsetHeight;
+    requestAnimationFrame(() => requestAnimationFrame(() => root.classList.remove("theme-switching")));
     try {
       localStorage.setItem(STORAGE_KEY, next);
     } catch {
